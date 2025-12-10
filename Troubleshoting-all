@@ -1,0 +1,380 @@
+✅ Correct Configuration Example
+Check with:
+pcs resource show VirtualIP
+
+
+Agar output me galat format hoga to error aayega.
+
+Correct format should be:
+pcs resource create VirtualIP IPaddr2 \
+    ip=10.191.145.144 \
+    cidr_netmask=21 \
+    nic=ens192 \
+    op monitor interval=20s
+
+🔥 WHY ERROR APPEARS?
+1. NIC name wrong?
+
+Check:
+
+ip a
+
+
+NIC ka sahi naam ho:
+
+ens192
+
+eth0
+
+ens160
+
+Agar cluster me NIC name same nahi hai to bhi findif fail karega.
+
+2. Wrong netmask format?
+
+IPaddr2 CIDR format mangta hai:
+
+✔ cidr_netmask=21
+❌ netmask=255.255.248.0 (Old format)
+
+⭐ Fix Step-by-Step
+1. Delete wrong resource
+pcs resource delete VirtualIP
+
+2. Re-create with correct syntax
+pcs resource create VirtualIP IPaddr2 \
+    ip=10.191.145.144 \
+    cidr_netmask=21 \
+    nic=ens192 \
+    op monitor interval=20s
+
+3. Clear failure
+pcs resource cleanup VirtualIP
+pcs resource refresh VirtualIP
+
+4. Check status
+pcs status
+
+
+
+
+pcs resource config VirtualIP
+pcs status
+
+
+
+
+
+Correct format ALWAYS इस तरह होना चाहिए:
+pcs resource create VirtualIP ocf:heartbeat:IPaddr2 ip=10.191.145.144 \
+ cidr_netmask=21 \
+ nic=ens192 \
+ op monitor interval=30s
+
+
+
+
+pcs resource delete VirtualIP
+pcs resource cleanup
+
+
+
+pcs resource create VirtualIP IPaddr2 \
+ ip=10.191.145.144 \
+ cidr_netmask=21 \
+ nic=ens192 \
+ op monitor interval=30s
+
+
+
+pcs status --full
+
+
+
+
+
+✅ Correct (Healthy) Output kaise dikhna chahiye?
+Healthy Cluster:
+Full List of Resources:
+  * vmfence     (stonith:fence_vmware_rest):     Started cmpcprmq90
+  * VirtualIP   (ocf:heartbeat:IPaddr2):         Started cmpcprmq90
+
+
+Agar failover ho jaye to:
+
+Full List of Resources:
+  * vmfence     (stonith:fence_vmware_rest):     Started cmpcprmq94
+  * VirtualIP   (ocf:heartbeat:IPaddr2):         Started cmpcprmq94
+
+
+
+
+
+
+✅ Next Step (Fix)
+
+👉 Mujhe yeh output bhej do:
+
+pcs stonith show vmfence
+pcs stonith config
+
+
+
+✔ Check which version of resource agent is installed
+
+Run this:
+
+rpm -qa | grep resource-agents
+
+
+Old versions do not support CIDR.
+
+But again → aapke logs ne already confirm kar diya.
+
+
+
+
+rpm -qa | grep resource-agents
+Expected Output Example
+Copy code
+resource-agents-4.12.0-4.el9.x86_64
+resource-agents-sap-4.12.0-4.el9.x86_64
+अगर ऐसा कोई पैकेज दिखता है → तो आपके सिस्टम में
+IPaddr2 agent already installed है।
+
+
+✅ Step-2: Check if IPaddr2 available in OCF path
+
+Check:
+
+ls /usr/lib/ocf/resource.d/heartbeat/ | grep IPaddr2
+
+Expected Output:
+IPaddr2
+
+इसका मतलब है IPaddr2 agent सही जगह मौजूद है और आप इसे PCS में use कर सकते हो।
+
+✅ Step-3: Why cidr_netmask=21 and NOT netmask=255.255.248.0?
+
+RHEL 9 / Pacemaker में नया format use होता है:
+
+✔ Modern format
+cidr_netmask=21
+
+✔ Equivalent old format
+netmask=255.255.248.0
+
+
+दोनों SAME हैं।
+
+
+
+
+
+rpm -qa | grep resource-agents
+Expected Output:
+कुछ ऐसा दिखना चाहिए:
+
+Copy code
+resource-agents-4.12.0-4.el9.x86_64
+यह दिखाता है कि resource-agents पैकेज इंस्टॉल है जिसमें IPaddr2 resource agent है।
+
+2. IPaddr2 agent फ़ाइल जाँचें
+bash
+Copy code
+ls /usr/lib/ocf/resource.d/heartbeat/ | grep IPaddr2
+Expected output:
+
+nginx
+Copy code
+IPaddr2
+मतलब:
+resource-agents पैकेज के बिना आपको IPaddr2 resource agent नहीं मिलेगा।
+
+cidr_netmask=21 इस्तेमाल करने के लिए यही पैकेज चाहिए।
+
+
+--------------------------------------------------------------------------------------------
+
+
+Step-by-step क्या चेक करें ताकि VirtualIP resource ठीक से start हो जाए:
+1. Resource agent फ़ाइल मौजूद है या नहीं
+ls /usr/lib/ocf/resource.d/heartbeat/ | grep IPaddr2
+
+
+अगर IPaddr2 दिखे, तो agent मौजूद है।
+
+2. Resource configuration सही है या नहीं
+pcs resource config VirtualIP
+
+
+यहाँ ip=, cidr_netmask=, nic= सही से configured हों।
+
+3. Node network interface ठीक से चल रहा है
+ip -o link show | grep ens192
+
+
+interface ens192 UP और RUNNING हो।
+
+4. Cluster status चेक करें
+pcs status --full
+
+
+यहाँ Resource status देखें — VirtualIP resource Started या Stopped लिखा होगा।
+
+5. Resource को start करें (अगर stopped है)
+pcs resource start VirtualIP
+
+6. Resource status फिर से देखें
+pcs resource status VirtualIP
+
+
+यहाँ Started दिखना चाहिए।
+
+7. Logs में error देखें अगर start नहीं हो रहा
+journalctl -u pacemaker -n 50
+
+
+या
+
+grep -i VirtualIP /var/log/pacemaker/pacemaker.log
+
+8. Network interface पर IP check करें
+
+Resource start होने पर VirtualIP को उस interface पर देख सकते हैं:
+
+ip a show dev ens192 | grep 10.191.145.144
+
+
+अगर IP दिखाई दे तो resource ठीक से attach हो गया।
+
+Troubleshooting tips
+
+cidr_netmask गलत हो तो error आएगा। RHEL 9.6 में cidr_netmask=21 सही है।
+
+Network interface नाम (e.g. ens192) सही होना चाहिए।
+
+Firewall या SELinux blocking न करे।
+
+pcs resource cleanup VirtualIP से resource की failure history reset करें।
+
+Node quorum सही हो (pcs status में देखें)।
+
+अगर resource बार-बार fail हो रहा है तो logs और error messages को ध्यान से देखें।
+
+अगर आप चाहें तो मैं आपके लिए एक checklist या debug commands का छोटा script भी बना देता हूँ।
+
+बताइए!
+
+You said:
+ip a show dev ens192 | grep 10.191.145.144   yahi ip dikhna chahiye ya node ka 
+ChatGPT said:
+
+ip a show dev ens192 | grep 10.191.145.144 में आपको वही Virtual IP (जो Pacemaker resource के लिए सेट किया गया है) दिखना चाहिए, यानी आपका 10.191.145.144 IP।
+
+मतलब:
+
+यह IP node का खुद का नहीं होता, बल्कि जो Pacemaker cluster में virtual IP resource के तौर पर चल रहा है, वो दिखना चाहिए।
+
+अगर Virtual IP resource active है और node पर bind हो चुका है तो ये IP interface पर दिखेगा।
+
+उदाहरण:
+
+अगर Virtual IP resource started है और node जिसपर चल रहा है वो cmpcprmq90 है, तो उस node पर ip a show dev ens192 में 10.191.145.144 दिखेगा।
+
+दूसरी node पर वो IP नहीं दिखेगा जब तक कि resource उस node पर move न हो।
+
+अगर IP नहीं दिख रहा:
+
+Resource start नहीं हुआ या fail हो रहा है।
+
+Network interface नाम गलत हो सकता है।
+
+Configuration में कोई गलती हो सकती है।
+
+संक्षेप:
+
+Virtual IP जो आपने configure किया है, वो जिस node पर active होगा, उसी node पर उसका IP interface पर दिखाई देगा।
+आपको उस node पर कमांड चलाकर देखना चाहिए जहाँ resource active होना चाहिए।
+
+
+
+
+
+Pacemaker, Corosync, और STONITH के लिए कुछ specific ports चाहिए होते हैं।
+Ports जैसे:
+
+UDP 5404, 5405 (corosync)
+
+TCP 2224 (pacemaker)
+
+और आपके fencing के लिए जो भी ports/URLs हैं
+
+अगर firewall on है तो open करें:
+
+firewall-cmd --list-all
+
+
+या
+
+firewall-cmd --permanent --add-port=5404/udp
+firewall-cmd --permanent --add-port=5405/udp
+firewall-cmd --permanent --add-port=2224/tcp
+firewall-cmd --reload
+
+
+
+
+
+1. जरूरी Ports जो Cluster (Pacemaker + Corosync) के लिए खुलने चाहिए:
+Service	Protocol	Port(s)	Description
+Corosync	UDP	5404, 5405	Cluster communication
+Pacemaker	TCP	2224	Cluster management (pcs daemon)
+STONITH	TCP/UDP	Depends on fencing device	Fencing device specific
+SSH	TCP	22	Remote management / fencing
+
+
+SELinux के कारण ports block हो रहे हैं या नहीं, ये भी चेक करें:
+sudo getsebool -a | grep pacemaker
+
+
+6. TCP/UDP Ports OS लेवल पर सुन रहे हैं या नहीं:
+sudo ss -tunlp | grep -E '5404|5405|2224'
+
+
+
+
+
+The command:
+
+sudo getsebool -a | grep pacemaker
+
+
+will display SELinux boolean settings related to Pacemaker on your system.
+
+Example output might look like this:
+pacemaker_manage_all_files --> off
+pacemaker_use_fenced --> off
+pacemaker_use_stonith --> on
+
+Explanation of fields:
+
+Each line shows a SELinux boolean related to Pacemaker.
+
+The value (on or off) indicates whether that particular permission or behavior is enabled (on) or disabled (off).
+
+For example:
+
+pacemaker_use_stonith --> on means Pacemaker is allowed to use STONITH fencing.
+
+pacemaker_manage_all_files --> off means it does not have permission to manage all files.
+
+If you get no output from the command, it means there are no SELinux booleans explicitly related to Pacemaker on your system.
+
+Would you like me to help you interpret the actual output if you run it
+
+
+
+
+
+

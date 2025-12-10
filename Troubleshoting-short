@@ -1,0 +1,113 @@
+✅ Correct Pacemaker VirtualIP Resource Configuration Guide
+1. Resource Create Command - Correct Format
+pcs resource create VirtualIP IPaddr2 \
+    ip=10.191.145.144 \
+    cidr_netmask=21 \
+    nic=ens192 \
+    op monitor interval=20s
+
+
+cidr_netmask=21 — यह modern (RHEL 9+) और सही format है।
+
+nic=ens192 — Network interface का सही नाम होना चाहिए (जैसे ens192, eth0, ens160 आदि)।
+
+2. Common Errors & Their Reasons
+Error	Possible Cause	Check/Fix
+ERROR: Invalid netmask specification	Wrong netmask format (old vs new)	Use cidr_netmask=21 instead of netmask=255.255.248.0
+ERROR: Unable to find nic or netmask	Wrong NIC name or NIC not present on node	Run ip a to check NIC names, ensure interface exists & UP
+findif failed	NIC mismatch across cluster nodes	Ensure all cluster nodes have same NIC names
+3. Step-by-Step Fix
+# Delete wrong resource if exists
+pcs resource delete VirtualIP
+
+# Create resource with correct syntax
+pcs resource create VirtualIP IPaddr2 \
+    ip=10.191.145.144 \
+    cidr_netmask=21 \
+    nic=ens192 \
+    op monitor interval=20s
+
+# Clear any failure history
+pcs resource cleanup VirtualIP
+pcs resource refresh VirtualIP
+
+# Check resource status
+pcs status
+pcs resource config VirtualIP
+
+4. Verify Network Interface
+ip -o link show | grep ens192
+ip a show dev ens192 | grep 10.191.145.144
+
+
+Virtual IP 10.191.145.144 तभी दिखेगा जब resource उस node पर active हो।
+
+NIC ens192 interface UP और RUNNING होना चाहिए।
+
+5. Expected Healthy Output
+Full List of Resources:
+  * vmfence     (stonith:fence_vmware_rest):     Started cmpcprmq90
+  * VirtualIP   (ocf:heartbeat:IPaddr2):         Started cmpcprmq90
+
+
+Failover के बाद, VirtualIP दूसरे node पर भी चल सकता है, जो नीचे दिखेगा।
+
+6. Check Resource Agents Package
+rpm -qa | grep resource-agents
+
+
+Expected:
+
+resource-agents-4.12.0-4.el9.x86_64
+resource-agents-sap-4.12.0-4.el9.x86_64
+
+
+यह confirm करता है कि IPaddr2 agent मौजूद है और CIDR netmask सपोर्ट करता है।
+
+7. Check IPaddr2 Agent File
+ls /usr/lib/ocf/resource.d/heartbeat/ | grep IPaddr2
+
+
+Expected:
+
+IPaddr2
+
+8. Firewall & SELinux
+
+Check necessary ports are open (UDP 5404, 5405 for Corosync; TCP 2224 for Pacemaker, fencing ports, SSH 22)
+
+SELinux boolean check:
+
+sudo getsebool -a | grep pacemaker
+
+
+यदि कुछ off हो, और cluster resource manage नहीं कर पा रहा हो, तो उसे on करें:
+
+sudo setsebool -P pacemaker_manage_all_files on
+sudo setsebool -P pacemaker_use_fenced on
+
+9. Summary of Important Commands
+pcs resource show VirtualIP
+pcs status --full
+pcs resource cleanup VirtualIP
+pcs resource start VirtualIP
+journalctl -u pacemaker -n 50
+grep -i VirtualIP /var/log/pacemaker/pacemaker.log
+ip a show dev ens192 | grep 10.191.145.144
+rpm -qa | grep resource-agents
+ls /usr/lib/ocf/resource.d/heartbeat/ | grep IPaddr2
+sudo getsebool -a | grep pacemaker
+
+10. Notes
+
+Virtual IP जो resource के लिए configure है, वो सिर्फ उस node पर दिखेगा जहां resource active हो।
+
+सभी cluster nodes में NIC नाम और configuration match होना चाहिए।
+
+Firewall और SELinux को properly configure करें ताकि communication block न हो।
+
+Resource failure होने पर pcs resource cleanup VirtualIP ज़रूर करें।
+
+अगर आप चाहें तो मैं आपको ये commands का छोटा diagnostic script भी बना सकता हूँ जो एक बार में चेक कर दे सारे points।
+
+आपको ये format ठीक लग रहा है? या कोई specific point पर और explanation चाहिए?

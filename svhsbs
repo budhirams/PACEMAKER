@@ -1,0 +1,193 @@
+Good — thanks for the outputs. We can fix this. Short summary of current state and then exact steps you can run.
+
+Summary (from your output)
+
+Cluster DC is cmpcprmq90 and partition is without quorum (2-node).
+
+cmpcprmq94 is UNCLEAN (offline).
+
+Both vmfence (fence_vmware_rest) and VirtualIP are Stopped.
+
+Many reboot of cmpcprmq94 failed entries → fencing tried but failed.
+
+Your pcs stonith config shows these attributes (important lines):
+
+ip=10.191.22.53
+username=cmpmq@sbi.co.in
+password=CMP_443@#
+ssl=1
+pcmk_host_map=cmpcprmq90:CMP_FASTPLUSP_MQ_Svr1;cmpcprmq94:CMP_FASTPLUSP_MQ_Svr2
+
+
+
+---
+
+What normally causes this
+
+Most common reasons fencing with fence_vmware_rest fails:
+
+1. pcmk_host_map entries do not exactly match the VM names as seen by vCenter/ESXi (case, spaces, special chars matter).
+
+
+2. Credentials (username/password) lack required privileges.
+
+
+3. SSL issues (self-signed cert) — need ssl_insecure=1.
+
+
+4. Agent expects different attribute names or extra options (pcmk_host_check, pcmk_host_list, etc.).
+
+
+5. Network connectivity to vCenter/ESXi (port 443) blocked.
+
+
+
+
+---
+
+What to do — step by step (run on cmpcprmq90 as root)
+
+1) Test the fence agent (verbose)
+
+This shows the exact error returned by the agent:
+
+stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94
+
+Read the output — it will say authentication failed, VM not found, SSL error, or timeout. Copy the error if you want me to interpret.
+
+
+---
+
+2) Quick immediate bring-up (temporary, not permanent)
+
+If you need cluster up now:
+
+pcs property set stonith-enabled=false
+pcs resource cleanup
+pcs status --full
+
+This lets resources start; do not leave stonith disabled permanently.
+
+
+---
+
+3) Verify VM names exactly in vCenter / ESXi
+
+Open vCenter UI and confirm the VM names for the two cluster VMs. The right side of pcmk_host_map must use the VM names exactly as vCenter shows:
+
+pcmk_host_map="cmpcprmq90:Exact_VM_Name_For_90;cmpcprmq94:Exact_VM_Name_For_94"
+
+Common pitfalls: extra spaces, underscores vs spaces, different case, truncated names, or using VM display name vs VM internal name.
+
+If vCenter has VM UUID option, you can also map to UUID — many admins prefer UUID because it's unambiguous.
+
+
+---
+
+4) Ensure SSL and credentials
+
+If vCenter uses a self-signed cert, add ssl_insecure=1 (or ssl=0 in some versions) and ensure username has privileges to power on/off/reboot VM.
+
+Recommended attributes:
+
+ip = vCenter IP (you already have)
+
+username (or login) = vCenter user (must have power/reset rights)
+
+password (or passwd)
+
+ssl_insecure=1 (if cert not trusted)
+
+pcmk_host_map="node1:VMname1;node2:VMname2"
+
+
+
+---
+
+5) Recreate / update the stonith resource (example)
+
+If you confirm the VM names and want to re-create the resource with safer options, run (replace VM names and user/password exactly):
+
+pcs stonith delete vmfence
+
+pcs stonith create vmfence fence_vmware_rest \
+  ip=10.191.22.53 \
+  username='cmpmq@sbi.co.in' \
+  password='CMP_443@#' \
+  ssl_insecure=1 \
+  pcmk_host_map="cmpcprmq90:CMP_FASTPLUSP_MQ_Svr1;cmpcprmq94:CMP_FASTPLUSP_MQ_Svr2" \
+  op monitor interval=60s
+
+Notes:
+
+Use ip in place of ipaddr if your agent expects ip. (Your existing config used ip so keep that.)
+
+ssl_insecure=1 is important for self-signed certs.
+
+pcmk_host_map must match exact vCenter VM names.
+
+
+After creating, run:
+
+pcs stonith show
+stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94
+pcs resource cleanup
+pcs status --full
+
+
+---
+
+6) If stonith_admin shows "VM not found" or "unable to find VM"
+
+Use the exact VM name from vCenter, or use the VM UUID. To use UUID, set pcmk_host_map="cmpcprmq94:vm-123" where vm-123 is the VM's MoRef/UUID used by VMware (get from vCenter UI or API).
+
+If >1000 VMs, you may have to add filters — but you likely don't have that many.
+
+
+
+---
+
+7) If stonith_admin shows authentication error
+
+Re-check username/password. Prefer using a vCenter account with least-privilege but with reboot/power operations allowed.
+
+Test connectivity to vCenter:
+
+
+curl -v https://10.191.22.53
+# or check TLS:
+openssl s_client -connect 10.191.22.53:443 -showcerts
+
+
+---
+
+8) Finally re-enable fencing (when fixed)
+
+When fencing tests succeed:
+
+pcs property set stonith-enabled=true
+pcs resource cleanup
+pcs status --full
+
+
+---
+
+Quick checklist you can run now
+
+1. stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94 → paste error here if you want.
+
+
+2. Confirm VM exact names from vCenter.
+
+
+3. If needed, recreate stonith resource with ssl_insecure=1 and correct pcmk_host_map.
+
+
+4. Re-enable stonith-enabled=true only after stonith_admin succeeds.
+
+
+
+
+---
+
+If you paste the exact output of the stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94 command here, I will read it and tell you exactly which attribute is failing and give the exact pcs stonith create ... line to run.

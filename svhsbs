@@ -1,193 +1,228 @@
-Good — thanks for the outputs. We can fix this. Short summary of current state and then exact steps you can run.
+[root@cmpcprmq90 ~]#
+[root@cmpcprmq90 ~]#  pcs status --full
+Cluster name: mq_cluster
+Cluster Summary:
+  * Stack: corosync (Pacemaker is running)
+  * Current DC: cmpcprmq90 (1) (version 2.1.9-1.el9-49aab9983) - partition WITHOUT quorum
+  * Last updated: Thu Dec 11 14:48:42 2025 on cmpcprmq90
+  * Last change:  Thu Dec 11 14:46:34 2025 by hacluster via hacluster on cmpcprmq90
+  * 2 nodes configured
+  * 2 resource instances configured
 
-Summary (from your output)
+Node List:
+  * Node cmpcprmq90 (1): online, feature set 3.19.6
+  * Node cmpcprmq94 (2): UNCLEAN (offline)
 
-Cluster DC is cmpcprmq90 and partition is without quorum (2-node).
+Full List of Resources:
+  * VirtualIP   (ocf:heartbeat:IPaddr2):         Stopped
+  * vmfence     (stonith:fence_vmware_rest):     Stopped
 
-cmpcprmq94 is UNCLEAN (offline).
+Migration Summary:
 
-Both vmfence (fence_vmware_rest) and VirtualIP are Stopped.
+Failed Fencing Actions:
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:36.045059 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:34.809037 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:33.586014 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:32.364992 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:31.087969 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:29.864946 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:28.603923 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:27.341900 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:26.121878 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:24.897855 +05:30'
 
-Many reboot of cmpcprmq94 failed entries → fencing tried but failed.
+Tickets:
 
-Your pcs stonith config shows these attributes (important lines):
+PCSD Status:
+  cmpcprmq90: Online
+  cmpcprmq94: Online
 
-ip=10.191.22.53
-username=cmpmq@sbi.co.in
-password=CMP_443@#
-ssl=1
-pcmk_host_map=cmpcprmq90:CMP_FASTPLUSP_MQ_Svr1;cmpcprmq94:CMP_FASTPLUSP_MQ_Svr2
+Daemon Status:
+  corosync: active/enabled
+  pacemaker: active/enabled
+  pcsd: active/enabled
+[root@cmpcprmq90 ~]# pcs stonith show vmfence
+Error: This command has been replaced with 'pcs stonith config'. See 'man pcs' -> Changes in pcs-0.11.
+[root@cmpcprmq90 ~]# pcs stonith config
+Resource: vmfence (class=stonith type=fence_vmware_rest)
+  Attributes: vmfence-instance_attributes
+    ip=10.191.22.53
+    password=gfhfhhhhfh
+    pcmk_host_map=cmpcprmq90:CMP_FASTPLUSP_MQ_Svr1;cmpcprmq94:CMP_FASTPLUSP_MQ_Svr2
+    ssl=1
+    username=cmpmq@sbi.co.in
+  Operations:
+    monitor: vmfence-monitor-interval-60s
+      interval=60s
+[root@cmpcprmq90 ~]# ls /usr/lib/ocf/resource.d/heartbeat/ | grep IPaddr2
+IPaddr2
+[root@cmpcprmq90 ~]# ip -o link show | grep ens192
+2: ens192: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000\    link/ether 00:50:56:8f:90:7f brd ff:ff:ff:ff:ff:ff\    altname enp11s0
+[root@cmpcprmq90 ~]# sudo ss -tunlp | grep -E '5404|5405|2224'
+udp   UNCONN 0      0      10.191.145.90:5405       0.0.0.0:*    users:(("corosync",pid=166474,fd=29))
+tcp   LISTEN 0      128          0.0.0.0:2224       0.0.0.0:*    users:(("pcsd",pid=166469,fd=40))
+tcp   LISTEN 0      128             [::]:2224          [::]:*    users:(("pcsd",pid=166469,fd=41))
+[root@cmpcprmq90 ~]# stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94
+stonith_admin: Cannot parse integer value “fence_vmware_rest” for -t
+[root@cmpcprmq90 ~]# pcs property set stonith-enabled=false
+[root@cmpcprmq90 ~]# pcs resource cleanup
+Cleaned up all resources on all nodes
+[root@cmpcprmq90 ~]# pcs status --full
+Cluster name: mq_cluster
+Cluster Summary:
+  * Stack: corosync (Pacemaker is running)
+  * Current DC: cmpcprmq90 (1) (version 2.1.9-1.el9-49aab9983) - partition WITHOUT quorum
+  * Last updated: Thu Dec 11 14:56:45 2025 on cmpcprmq90
+  * Last change:  Thu Dec 11 14:56:21 2025 by root via root on cmpcprmq90
+  * 2 nodes configured
+  * 2 resource instances configured
 
+Node List:
+  * Node cmpcprmq90 (1): online, feature set 3.19.6
+  * Node cmpcprmq94 (2): OFFLINE
 
+Full List of Resources:
+  * VirtualIP   (ocf:heartbeat:IPaddr2):         Stopped
+  * vmfence     (stonith:fence_vmware_rest):     Stopped
 
+Migration Summary:
+
+Failed Fencing Actions:
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:36.045059 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:34.809037 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:33.586014 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:32.364992 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:31.087969 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:29.864946 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:28.603923 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:27.341900 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:26.121878 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:24.897855 +05:30'
+
+Tickets:
+
+PCSD Status:
+  cmpcprmq90: Online
+  cmpcprmq94: Online
+
+Daemon Status:
+  corosync: active/enabled
+  pacemaker: active/enabled
+  pcsd: active/enabled
+[root@cmpcprmq90 ~]# # here it si stopped
+[root@cmpcprmq90 ~]#
+[root@cmpcprmq90 ~]#
+[root@cmpcprmq90 ~]#
+[root@cmpcprmq90 ~]# pcs stonith show
+Error: This command has been replaced with 'pcs stonith status'. See 'man pcs' -> Changes in pcs-0.11.
+[root@cmpcprmq90 ~]# pcs stonith status
+  * vmfence     (stonith:fence_vmware_rest):     Stopped
+[root@cmpcprmq90 ~]# stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94
+stonith_admin: Cannot parse integer value “fence_vmware_rest” for -t
+[root@cmpcprmq90 ~]# stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq90
+stonith_admin: Cannot parse integer value “fence_vmware_rest” for -t
+[root@cmpcprmq90 ~]# curl -v https://10.191.22.53
+*   Trying 10.191.22.53:443...
+* Connected to 10.191.22.53 (10.191.22.53) port 443 (#0)
+* ALPN, offering h2
+* ALPN, offering http/1.1
+*  CAfile: /etc/pki/tls/certs/ca-bundle.crt
+* TLSv1.0 (OUT), TLS header, Certificate Status (22):
+* TLSv1.3 (OUT), TLS handshake, Client hello (1):
+* TLSv1.2 (IN), TLS header, Certificate Status (22):
+* TLSv1.3 (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS header, Certificate Status (22):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (OUT), TLS header, Unknown (21):
+* TLSv1.2 (OUT), TLS alert, unknown CA (560):
+* SSL certificate problem: unable to get local issuer certificate
+* Closing connection 0
+curl: (60) SSL certificate problem: unable to get local issuer certificate
+More details here: https://curl.se/docs/sslcerts.html
+
+curl failed to verify the legitimacy of the server and therefore could not
+establish a secure connection to it. To learn more about this situation and
+how to fix it, please visit the web page mentioned above.
+[root@cmpcprmq90 ~]# openssl s_client -connect 10.191.22.53:443 -showcerts
+Connecting to 10.191.22.53
+CONNECTED(00000003)
+Can't use SSL_get_servername
+depth=0 C=IN, ST=MH, L=Navi Mumbai, O=SBI, OU=DC&CS, CN=m01vc01.corp.ad.sbi
+verify error:num=20:unable to get local issuer certificate
+verify return:1
+depth=0 C=IN, ST=MH, L=Navi Mumbai, O=SBI, OU=DC&CS, CN=m01vc01.corp.ad.sbi
+verify error:num=21:unable to verify the first certificate
+verify return:1
+depth=0 C=IN, ST=MH, L=Navi Mumbai, O=SBI, OU=DC&CS, CN=m01vc01.corp.ad.sbi
+verify return:1
 ---
+Certificate chain
+ 0 s:C=IN, ST=MH, L=Navi Mumbai, O=SBI, OU=DC&CS, CN=m01vc01.corp.ad.sbi
+   i:DC=SBI, DC=AD, CN=SBI-PROD-RCA
+   a:PKEY: RSA, 4096 (bit); sigalg: sha256WithRSAEncryption
+   v:NotBefore: Feb  8 05:54:10 2024 GMT; NotAfter: Feb  7 05:54:10 2026 GMT
+-----BEGIN CERTIFICATE-----
+MIIGrzCCBZegAwIBAgITGgARBONqve5uxpKHewAAABEE4zANBgkqhkiG9w0BAQsF
+ADBAMRMwEQYKCZImiZPyLGQBGRYDU0JJMRIwEAYKCZImiZPyLGQBGRYCQUQxFTAT
+BgNVBAMTDFNCSS1QUk9ELVJDQTAeFw0yNDAyMDgwNTU0MTBaFw0yNjAyMDcwNTU0
+MTBaMGwxCzAJBgNVBAYTAklOMQswCQYDVQQIEwJNSDEUMBIGA1UEBxMLTmF2aSBN
+dW1iYWkxDDAKBgNVBAoTA1NCSTEOMAwGA1UECwwFREMmQ1MxHDAaBgNVBAMTE20w
+MXZjMDEuY29ycC5hZC5zYmkwggIiMA0GCSqGSIb3DQEBAQUAA4ICDwAwggIKAoIC
+AQDZ8MnG/EYjmRrlumKd/vux8NviDqmsJw5i7aIaEuOILpp/W8JMTDw7ynBA1GQC
+IEmxEVXLlY7c1of+FHlyWTiBP3L5o5VhOBmdhy9jYXFPhuD0h4AFF80hw0YWbmvM
 
-What normally causes this
-
-Most common reasons fencing with fence_vmware_rest fails:
-
-1. pcmk_host_map entries do not exactly match the VM names as seen by vCenter/ESXi (case, spaces, special chars matter).
-
-
-2. Credentials (username/password) lack required privileges.
-
-
-3. SSL issues (self-signed cert) — need ssl_insecure=1.
-
-
-4. Agent expects different attribute names or extra options (pcmk_host_check, pcmk_host_list, etc.).
-
-
-5. Network connectivity to vCenter/ESXi (port 443) blocked.
-
-
-
-
+f/8fBpOJ1G4iJ25kTmxfQrV6SvA0eNu45UMmM7Ktd28gjvsa9V1Eph8S5HcyBrSa
+9XgXuml92/qKwGi7nTZQKuEiq8IjSJcAg6J3p0QOBCPwxOo=
+-----END CERTIFICATE-----
 ---
-
-What to do — step by step (run on cmpcprmq90 as root)
-
-1) Test the fence agent (verbose)
-
-This shows the exact error returned by the agent:
-
-stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94
-
-Read the output — it will say authentication failed, VM not found, SSL error, or timeout. Copy the error if you want me to interpret.
-
-
+Server certificate
+subject=C=IN, ST=MH, L=Navi Mumbai, O=SBI, OU=DC&CS, CN=m01vc01.corp.ad.sbi
+issuer=DC=SBI, DC=AD, CN=SBI-PROD-RCA
 ---
-
-2) Quick immediate bring-up (temporary, not permanent)
-
-If you need cluster up now:
-
-pcs property set stonith-enabled=false
-pcs resource cleanup
-pcs status --full
-
-This lets resources start; do not leave stonith disabled permanently.
-
-
+No client certificate CA names sent
+Peer signing digest: SHA256
+Peer signature type: rsa_pss_rsae_sha256
+Peer Temp Key: ECDH, prime256v1, 256 bits
 ---
-
-3) Verify VM names exactly in vCenter / ESXi
-
-Open vCenter UI and confirm the VM names for the two cluster VMs. The right side of pcmk_host_map must use the VM names exactly as vCenter shows:
-
-pcmk_host_map="cmpcprmq90:Exact_VM_Name_For_90;cmpcprmq94:Exact_VM_Name_For_94"
-
-Common pitfalls: extra spaces, underscores vs spaces, different case, truncated names, or using VM display name vs VM internal name.
-
-If vCenter has VM UUID option, you can also map to UUID — many admins prefer UUID because it's unambiguous.
-
-
+SSL handshake has read 2659 bytes and written 431 bytes
+Verification error: unable to verify the first certificate
 ---
+New, TLSv1.2, Cipher is ECDHE-RSA-AES256-GCM-SHA384
+Protocol: TLSv1.2
+Server public key is 4096 bit
+Secure Renegotiation IS supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+SSL-Session:
+    Protocol  : TLSv1.2
+    Cipher    : ECDHE-RSA-AES256-GCM-SHA384
+    Session-ID: C7D9BF79BA6174CF8E91E2ED53E3B0DEC6523D326D320CFCF619E5DACB54E598
+    Session-ID-ctx:
+    Master-Key: 1114A8621E059717AB2BD9A413F84EE1C0EC61E1C0935118052B9FBC9541AAAB79B767B9457EAF60457234CA3286B489
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 7200 (seconds)
+    TLS session ticket:
+    0000 - 6b ec 0c c6 3c 87 09 43-81 49 25 58 33 12 e7 d9   k...<..C.I%X3...
+    0010 - ec 15 9e ab fa 70 1e 29-28 38 da a1 7f f4 5c 62   .....p.)(8....\b
+    0020 - da 7e ce 98 4a a8 34 87-05 64 52 e2 98 7e 0b 39   .~..J.4..dR..~.9
+    0030 - 57 ee 67 90 10 32 6f e7-c4 25 23 8a b4 99 24 89   W.g..2o..%#...$.
+    0040 - 26 a3 ee 6f a4 e2 8c 95-05 3d 04 c0 ee c5 1a 1c   &..o.....=......
+    0050 - d8 3b e8 bc f9 3b 38 dc-f8 9f d3 6f 7c 52 68 e8   .;...;8....o|Rh.
+    0060 - 7a 3c 7c d2 24 52 9e db-73 84 5c c2 ee c7 7e 88   z<|.$R..s.\...~.
+    0070 - 25 73 20 5b f0 45 f9 ad-7d a8 f6 bb b0 35 91 f6   %s [.E..}....5..
+    0080 - 22 50 17 c5 af 6a 12 5a-5e e2 b2 c3 11 6b d7 b8   "P...j.Z^....k..
+    0090 - e7 db 48 c9 c2 ab 47 09-b1 4a e4 6b 77 fe fb 94   ..H...G..J.kw...
+    00a0 - 45 54 ca c4 e6 7f 15 fe-83 44 23 9e a5 d9 60 de   ET.......D#...`.
+    00b0 - 17 a8 7a 28 ce c1 52 99-14 6c 80 16 bd 64 78 b5   ..z(..R..l...dx.
 
-4) Ensure SSL and credentials
-
-If vCenter uses a self-signed cert, add ssl_insecure=1 (or ssl=0 in some versions) and ensure username has privileges to power on/off/reboot VM.
-
-Recommended attributes:
-
-ip = vCenter IP (you already have)
-
-username (or login) = vCenter user (must have power/reset rights)
-
-password (or passwd)
-
-ssl_insecure=1 (if cert not trusted)
-
-pcmk_host_map="node1:VMname1;node2:VMname2"
-
-
-
+    Start Time: 1765445415
+    Timeout   : 7200 (sec)
+    Verify return code: 21 (unable to verify the first certificate)
+    Extended master secret: yes
 ---
-
-5) Recreate / update the stonith resource (example)
-
-If you confirm the VM names and want to re-create the resource with safer options, run (replace VM names and user/password exactly):
-
-pcs stonith delete vmfence
-
-pcs stonith create vmfence fence_vmware_rest \
-  ip=10.191.22.53 \
-  username='cmpmq@sbi.co.in' \
-  password='CMP_443@#' \
-  ssl_insecure=1 \
-  pcmk_host_map="cmpcprmq90:CMP_FASTPLUSP_MQ_Svr1;cmpcprmq94:CMP_FASTPLUSP_MQ_Svr2" \
-  op monitor interval=60s
-
-Notes:
-
-Use ip in place of ipaddr if your agent expects ip. (Your existing config used ip so keep that.)
-
-ssl_insecure=1 is important for self-signed certs.
-
-pcmk_host_map must match exact vCenter VM names.
-
-
-After creating, run:
-
-pcs stonith show
-stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94
-pcs resource cleanup
-pcs status --full
-
-
----
-
-6) If stonith_admin shows "VM not found" or "unable to find VM"
-
-Use the exact VM name from vCenter, or use the VM UUID. To use UUID, set pcmk_host_map="cmpcprmq94:vm-123" where vm-123 is the VM's MoRef/UUID used by VMware (get from vCenter UI or API).
-
-If >1000 VMs, you may have to add filters — but you likely don't have that many.
-
-
-
----
-
-7) If stonith_admin shows authentication error
-
-Re-check username/password. Prefer using a vCenter account with least-privilege but with reboot/power operations allowed.
-
-Test connectivity to vCenter:
-
-
-curl -v https://10.191.22.53
-# or check TLS:
-openssl s_client -connect 10.191.22.53:443 -showcerts
-
-
----
-
-8) Finally re-enable fencing (when fixed)
-
-When fencing tests succeed:
-
-pcs property set stonith-enabled=true
-pcs resource cleanup
-pcs status --full
-
-
----
-
-Quick checklist you can run now
-
-1. stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94 → paste error here if you want.
-
-
-2. Confirm VM exact names from vCenter.
-
-
-3. If needed, recreate stonith resource with ssl_insecure=1 and correct pcmk_host_map.
-
-
-4. Re-enable stonith-enabled=true only after stonith_admin succeeds.
-
-
-
-
----
-
-If you paste the exact output of the stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94 command here, I will read it and tell you exactly which attribute is failing and give the exact pcs stonith create ... line to run.
+q^C
+[root@cmpcprmq90 ~]#  stonith_admin -F -v -t fence_vmware_rest -n cmpcprmq94
+stonith_admin: Cannot parse integer value “fence_vmware_rest” for -t

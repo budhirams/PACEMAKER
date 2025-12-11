@@ -1,0 +1,109 @@
+[root@cmpcprmq90 ~]# pcs status --full
+Cluster name: mq_cluster
+Cluster Summary:
+  * Stack: corosync (Pacemaker is running)
+  * Current DC: cmpcprmq90 (1) (version 2.1.9-1.el9-49aab9983) - partition WITHOUT quorum
+  * Last updated: Thu Dec 11 14:48:17 2025 on cmpcprmq90
+  * Last change:  Thu Dec 11 14:46:34 2025 by hacluster via hacluster on cmpcprmq90
+  * 2 nodes configured
+  * 2 resource instances configured
+
+Node List:
+  * Node cmpcprmq90 (1): online, feature set 3.19.6
+  * Node cmpcprmq94 (2): UNCLEAN (offline)
+
+Full List of Resources:
+  * VirtualIP   (ocf:heartbeat:IPaddr2):         Stopped
+  * vmfence     (stonith:fence_vmware_rest):     Stopped
+
+Migration Summary:
+
+Failed Fencing Actions:
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:36.045059 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:34.809037 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:33.586014 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:32.364992 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:31.087969 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:29.864946 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:28.603923 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:27.341900 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:26.121878 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:24.897855 +05:30'
+
+Tickets:
+
+PCSD Status:
+  cmpcprmq90: Online
+  cmpcprmq94: Online
+
+Daemon Status:
+  corosync: active/enabled
+  pacemaker: active/enabled
+  pcsd: active/enabled
+[root@cmpcprmq90 ~]#
+[root@cmpcprmq90 ~]#
+[root@cmpcprmq90 ~]#
+[root@cmpcprmq90 ~]#
+[root@cmpcprmq90 ~]#  pcs status --full
+Cluster name: mq_cluster
+Cluster Summary:
+  * Stack: corosync (Pacemaker is running)
+  * Current DC: cmpcprmq90 (1) (version 2.1.9-1.el9-49aab9983) - partition WITHOUT quorum
+  * Last updated: Thu Dec 11 14:48:42 2025 on cmpcprmq90
+  * Last change:  Thu Dec 11 14:46:34 2025 by hacluster via hacluster on cmpcprmq90
+  * 2 nodes configured
+  * 2 resource instances configured
+
+Node List:
+  * Node cmpcprmq90 (1): online, feature set 3.19.6
+  * Node cmpcprmq94 (2): UNCLEAN (offline)
+
+Full List of Resources:
+  * VirtualIP   (ocf:heartbeat:IPaddr2):         Stopped
+  * vmfence     (stonith:fence_vmware_rest):     Stopped
+
+Migration Summary:
+
+Failed Fencing Actions:
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:36.045059 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:34.809037 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:33.586014 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:32.364992 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:31.087969 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:29.864946 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:28.603923 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:27.341900 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:26.121878 +05:30'
+  * reboot of cmpcprmq94 failed: delegate=cmpcprmq90, client=pacemaker-controld.166561, origin=cmpcprmq90, completed='2025-12-11 14:31:24.897855 +05:30'
+
+Tickets:
+
+PCSD Status:
+  cmpcprmq90: Online
+  cmpcprmq94: Online
+
+Daemon Status:
+  corosync: active/enabled
+  pacemaker: active/enabled
+  pcsd: active/enabled
+[root@cmpcprmq90 ~]# pcs stonith show vmfence
+Error: This command has been replaced with 'pcs stonith config'. See 'man pcs' -> Changes in pcs-0.11.
+[root@cmpcprmq90 ~]# pcs stonith config
+Resource: vmfence (class=stonith type=fence_vmware_rest)
+  Attributes: vmfence-instance_attributes
+    ip=10.191.22.53
+    password=CMP_443@#
+    pcmk_host_map=cmpcprmq90:CMP_FASTPLUSP_MQ_Svr1;cmpcprmq94:CMP_FASTPLUSP_MQ_Svr2
+    ssl=1
+    username=cmpmq@sbi.co.in
+  Operations:
+    monitor: vmfence-monitor-interval-60s
+      interval=60s
+[root@cmpcprmq90 ~]# ls /usr/lib/ocf/resource.d/heartbeat/ | grep IPaddr2
+IPaddr2
+[root@cmpcprmq90 ~]# ip -o link show | grep ens192
+2: ens192: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc mq state UP mode DEFAULT group default qlen 1000\    link/ether 00:50:56:8f:90:7f brd ff:ff:ff:ff:ff:ff\    altname enp11s0
+[root@cmpcprmq90 ~]# sudo ss -tunlp | grep -E '5404|5405|2224'
+udp   UNCONN 0      0      10.191.145.90:5405       0.0.0.0:*    users:(("corosync",pid=166474,fd=29))
+tcp   LISTEN 0      128          0.0.0.0:2224       0.0.0.0:*    users:(("pcsd",pid=166469,fd=40))
+tcp   LISTEN 0      128             [::]:2224          [::]:*    users:(("pcsd",pid=166469,fd=41))

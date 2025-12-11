@@ -1,0 +1,51 @@
+[root@cmpcprmq90 ~]# journalctl -ru corosync -n 50
+Dec 11 14:31:01 cmpcprmq90 systemd[1]: Started Corosync Cluster Engine.
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [MAIN  ] Completed service synchronization, ready to provide service.
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [QUORUM] Members[1]: 1
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [VOTEQ ] Waiting for all cluster members. Current votes: 1 expected_votes: 2
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [VOTEQ ] Waiting for all cluster members. Current votes: 1 expected_votes: 2
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [VOTEQ ] Waiting for all cluster members. Current votes: 1 expected_votes: 2
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [TOTEM ] A new membership (1.32) was formed. Members joined: 1
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [QUORUM] Sync joined[1]: 1
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [QUORUM] Sync members[1]: 1
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [KNET  ] host: host: 2 has no active links
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [KNET  ] host: host: 2 (passive) best link: 0 (pri: 1)
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [KNET  ] host: host: 2 has no active links
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [KNET  ] host: host: 2 (passive) best link: 0 (pri: 1)
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [KNET  ] host: host: 2 has no active links
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [KNET  ] host: host: 2 (passive) best link: 0 (pri: 0)
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [KNET  ] link: Resetting MTU for link 0 because host 1 joined
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [TOTEM ] Configured link number 0: local addr: 10.191.145.90, port=5405
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [TOTEM ] Configuring link 0
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [QB    ] server name: quorum
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [SERV  ] Service engine loaded: corosync cluster quorum service v0.1 [3]
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [QB    ] server name: votequorum
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [SERV  ] Service engine loaded: corosync vote quorum service v1.0 [5]
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [VOTEQ ] Waiting for all cluster members. Current votes: 1 expected_votes: 2
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [QUORUM] Using quorum provider corosync_votequorum
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [SERV  ] Service engine loaded: corosync profile loading service [4]
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [QB    ] server name: cpg
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [SERV  ] Service engine loaded: corosync cluster closed process group service v1.01 [2]
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [QB    ] server name: cfg
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [SERV  ] Service engine loaded: corosync configuration service [1]
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [QB    ] server name: cmap
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [SERV  ] Service engine loaded: corosync configuration map access [0]
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [KNET  ] common: crypto_nss.so has been loaded from /usr/lib64/kronosnet/crypto_nss.so
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [KNET  ] pmtud: MTU manually set to: 0
+Dec 11 14:31:00 cmpcprmq90 corosync[166474]:   [TOTEM ] totemknet initialized
+Dec 11 14:30:59 cmpcprmq90 corosync[166474]:   [TOTEM ] Initializing transport (Kronosnet).
+Dec 11 14:30:59 cmpcprmq90 corosync[166474]:   [MAIN  ] Corosync built-in features: dbus systemd xmlconf vqsim nozzle snmp pie relro bindnow
+Dec 11 14:30:59 cmpcprmq90 corosync[166474]:   [MAIN  ] Corosync Cluster Engine 3.1.9 starting up
+Dec 11 14:30:59 cmpcprmq90 systemd[1]: Starting Corosync Cluster Engine...
+Dec 11 14:30:59 cmpcprmq90 systemd[1]: corosync.service: Consumed 26.259s CPU time, 156.7M memory peak.
+Dec 11 14:30:59 cmpcprmq90 systemd[1]: Stopped Corosync Cluster Engine.
+Dec 11 14:30:59 cmpcprmq90 systemd[1]: corosync.service: Deactivated successfully.
+Dec 11 14:30:59 cmpcprmq90 corosync[152908]:   [MAIN  ] Corosync Cluster Engine exiting normally
+Dec 11 14:30:59 cmpcprmq90 corosync[152908]:   [KNET  ] link: Resetting MTU for link 0 because host 1 joined
+Dec 11 14:30:59 cmpcprmq90 corosync[152908]:   [SERV  ] Service engine unloaded: corosync profile loading service
+Dec 11 14:30:59 cmpcprmq90 corosync[152908]:   [SERV  ] Service engine unloaded: corosync cluster quorum service v0.1
+Dec 11 14:30:59 cmpcprmq90 corosync[152908]:   [QB    ] withdrawing server sockets
+Dec 11 14:30:59 cmpcprmq90 corosync[152908]:   [SERV  ] Service engine unloaded: corosync cluster closed process group service v1.01
+Dec 11 14:30:59 cmpcprmq90 corosync[152908]:   [QB    ] withdrawing server sockets
+Dec 11 14:30:59 cmpcprmq90 corosync[152908]:   [SERV  ] Service engine unloaded: corosync configuration service
+Dec 11 14:30:59 cmpcprmq90 corosync[152908]:   [QB    ] withdrawing server sockets

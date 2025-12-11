@@ -1,0 +1,1 @@
+stonith_admin --fence --verbose --agent fence_vmware_rest --plug CMP_FASTPLUSP_MQ_Svr2

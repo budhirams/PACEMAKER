@@ -1,0 +1,19 @@
+[root@cmpcprmq90 ~]# pcs stonith create vmfence fence_vmware_rest pcmk_host_map="cmpcprmq90:CMP_FASTPLUSP_MQ_Svr1;cmpcprmq94:CMP_FASTPLUSP_MQ_Svr2" ip=10.191.22.53 ssl=1 username=cmpmq@sbi.co.in password='CMP_443@#'
+[root@cmpcprmq90 ~]# pcs stonith config
+Resource: vmfence (class=stonith type=fence_vmware_rest)
+  Attributes: vmfence-instance_attributes
+    ip=10.191.22.53
+    password=C4@#
+    pcmk_host_map=cmpcprmq90:CMP_FASTPLUSP_MQ_Svr1;cmpcprmq94:CMP_FASTPLUSP_MQ_Svr2
+    ssl=1
+    username=cmpmq@sbi.co.in
+  Operations:
+    monitor: vmfence-monitor-interval-60s
+      interval=60s
+[root@cmpcprmq90 ~]# pcs stonith fence cmpcprmq90
+Error: unable to fence 'cmpcprmq90'
+stonith_admin: Couldn't fence cmpcprmq90: No data available
+
+[root@cmpcprmq90 ~]# pcs stonith fence cmpcprmq94
+Error: unable to fence 'cmpcprmq94'
+stonith_admin: Couldn't fence cmpcprmq94: No data available

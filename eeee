@@ -1,0 +1,11 @@
+[root@cmpcprmq90 ~]# pcs stonith config
+Resource: vmfence (class=stonith type=fence_vmware_rest)
+  Attributes: vmfence-instance_attributes
+    ip=10.191.22.53
+    password=CMP3jjj@#
+    pcmk_host_map=cmpcprmq90:CMP_FASTPLUSP_MQ_Svr1;cmpcprmq94:CMP_FASTPLUSP_MQ_Svr2
+    ssl=1
+    username=cmpmq@sbi.co.in
+  Operations:
+    monitor: vmfence-monitor-interval-60s
+      interval=60s

@@ -1,0 +1,57 @@
+Dec 11 15:14:38 cmpcprmq90 pacemaker-controld[170753]:  notice: State transition S_TRANSITION_ENGINE -> S_IDLE
+Dec 11 15:17:24 cmpcprmq90 pacemaker-controld[170753]:  notice: State transition S_IDLE -> S_POLICY_ENGINE
+Dec 11 15:17:24 cmpcprmq90 pacemaker-schedulerd[170752]:  notice: On loss of quorum: Ignore
+Dec 11 15:17:24 cmpcprmq90 pacemaker-schedulerd[170752]:  notice: Actions: Start      VirtualIP     ( cmpcprmq90 )
+Dec 11 15:17:24 cmpcprmq90 pacemaker-schedulerd[170752]:  notice: Actions: Start      vmfence       ( cmpcprmq90 )
+Dec 11 15:17:24 cmpcprmq90 pacemaker-schedulerd[170752]:  notice: Calculated transition 4, saving inputs in /var/lib/pacemaker/pengine/pe-input-13.bz2
+Dec 11 15:17:24 cmpcprmq90 pacemaker-controld[170753]:  notice: Initiating start operation VirtualIP_start_0 locally on cmpcprmq90
+Dec 11 15:17:24 cmpcprmq90 pacemaker-controld[170753]:  notice: Initiating start operation vmfence_start_0 locally on cmpcprmq90
+Dec 11 15:17:24 cmpcprmq90 pacemaker-controld[170753]:  notice: Requesting local execution of start operation for VirtualIP on cmpcprmq90
+Dec 11 15:17:24 cmpcprmq90 pacemaker-controld[170753]:  notice: Requesting local execution of start operation for vmfence on cmpcprmq90
+Dec 11 15:17:24 cmpcprmq90 IPaddr2(VirtualIP)[171739]: INFO: Adding inet address 10.191.145.144/21 with broadcast address 10.191.151.255 to device ens192
+Dec 11 15:17:24 cmpcprmq90 IPaddr2(VirtualIP)[171745]: INFO: Bringing device ens192 up
+Dec 11 15:17:24 cmpcprmq90 pacemaker-controld[170753]:  notice: Result of start operation for VirtualIP on cmpcprmq90: ok
+Dec 11 15:17:24 cmpcprmq90 pacemaker-controld[170753]:  notice: Initiating monitor operation VirtualIP_monitor_20000 locally on cmpcprmq90
+Dec 11 15:17:24 cmpcprmq90 pacemaker-controld[170753]:  notice: Requesting local execution of monitor operation for VirtualIP on cmpcprmq90
+Dec 11 15:17:24 cmpcprmq90 fence_vmware_rest[171716]: Unable to connect/login to fencing device
+Dec 11 15:17:24 cmpcprmq90 pacemaker-fenced[170749]:  warning: fence_vmware_rest[171716] stderr: [ 2025-12-11 15:17:24,908 ERROR: Unable to connect/login to fencing device ]
+Dec 11 15:17:24 cmpcprmq90 pacemaker-fenced[170749]:  warning: fence_vmware_rest[171716] stderr: [  ]
+Dec 11 15:17:24 cmpcprmq90 pacemaker-fenced[170749]:  warning: fence_vmware_rest[171716] stderr: [  ]
+Dec 11 15:17:24 cmpcprmq90 pacemaker-controld[170753]:  notice: Result of monitor operation for VirtualIP on cmpcprmq90: ok
+Dec 11 15:17:26 cmpcprmq90 fence_vmware_rest[171818]: Unable to connect/login to fencing device
+Dec 11 15:17:26 cmpcprmq90 pacemaker-fenced[170749]:  warning: fence_vmware_rest[171818] stderr: [ 2025-12-11 15:17:26,009 ERROR: Unable to connect/login to fencing device ]
+Dec 11 15:17:26 cmpcprmq90 pacemaker-fenced[170749]:  warning: fence_vmware_rest[171818] stderr: [  ]
+Dec 11 15:17:26 cmpcprmq90 pacemaker-fenced[170749]:  warning: fence_vmware_rest[171818] stderr: [  ]
+Dec 11 15:17:26 cmpcprmq90 pacemaker-fenced[170749]:  notice: Operation 'monitor' [171818] using vmfence returned 1
+Dec 11 15:17:26 cmpcprmq90 pacemaker-controld[170753]:  notice: Result of start operation for vmfence on cmpcprmq90: error
+Dec 11 15:17:26 cmpcprmq90 pacemaker-controld[170753]:  notice: Transition 4 aborted by operation vmfence_start_0 'modify' on cmpcprmq90: Event failed
+Dec 11 15:17:26 cmpcprmq90 pacemaker-controld[170753]:  notice: Transition 4 action 3 (vmfence_start_0 on cmpcprmq90): expected 'ok' but got 'error'
+Dec 11 15:17:26 cmpcprmq90 pacemaker-controld[170753]:  notice: Transition 4 (Complete=3, Pending=0, Fired=0, Skipped=0, Incomplete=1, Source=/var/lib/pacemaker/pengine/pe-input-13.bz2): Complete
+Dec 11 15:17:26 cmpcprmq90 pacemaker-attrd[170751]:  notice: Setting last-failure-vmfence#start_0[cmpcprmq90] in instance_attributes: (unset) -> 1765446446
+Dec 11 15:17:26 cmpcprmq90 pacemaker-attrd[170751]:  notice: Setting fail-count-vmfence#start_0[cmpcprmq90] in instance_attributes: (unset) -> INFINITY
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  notice: On loss of quorum: Ignore
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  warning: Unexpected result (error) was recorded for start of vmfence on cmpcprmq90 at Dec 11 15:17:24 2025
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  warning: Unexpected result (error) was recorded for start of vmfence on cmpcprmq90 at Dec 11 15:17:24 2025
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  notice: Actions: Recover    vmfence       ( cmpcprmq90 )
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  warning: Calculated transition 5 (with warnings), saving inputs in /var/lib/pacemaker/pengine/pe-warn-67.bz2
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  notice: On loss of quorum: Ignore
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  warning: Unexpected result (error) was recorded for start of vmfence on cmpcprmq90 at Dec 11 15:17:24 2025
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  warning: Unexpected result (error) was recorded for start of vmfence on cmpcprmq90 at Dec 11 15:17:24 2025
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  warning: vmfence cannot run on cmpcprmq90 due to reaching migration threshold (clean up resource to allow again)
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  notice: Actions: Stop       vmfence       ( cmpcprmq90 )  due to node availability
+Dec 11 15:17:26 cmpcprmq90 pacemaker-schedulerd[170752]:  warning: Calculated transition 6 (with warnings), saving inputs in /var/lib/pacemaker/pengine/pe-warn-68.bz2
+Dec 11 15:17:26 cmpcprmq90 pacemaker-controld[170753]:  notice: Initiating stop operation vmfence_stop_0 locally on cmpcprmq90
+Dec 11 15:17:26 cmpcprmq90 pacemaker-controld[170753]:  notice: Requesting local execution of stop operation for vmfence on cmpcprmq90
+Dec 11 15:17:26 cmpcprmq90 pacemaker-controld[170753]:  notice: Result of stop operation for vmfence on cmpcprmq90: ok
+Dec 11 15:17:26 cmpcprmq90 pacemaker-controld[170753]:  notice: Transition 6 (Complete=1, Pending=0, Fired=0, Skipped=0, Incomplete=0, Source=/var/lib/pacemaker/pengine/pe-warn-68.bz2): Complete
+Dec 11 15:17:26 cmpcprmq90 pacemaker-controld[170753]:  notice: State transition S_TRANSITION_ENGINE -> S_IDLE
+Dec 11 15:17:28 cmpcprmq90 IPaddr2(VirtualIP)[171823]: INFO: ARPING 10.191.145.144 from 10.191.145.144 ens192
+                                                       Sent 5 probes (5 broadcast(s))
+                                                       Received 0 response(s)
+Dec 11 15:32:26 cmpcprmq90 pacemaker-controld[170753]:  notice: State transition S_IDLE -> S_POLICY_ENGINE
+Dec 11 15:32:26 cmpcprmq90 pacemaker-schedulerd[170752]:  notice: On loss of quorum: Ignore
+Dec 11 15:32:26 cmpcprmq90 pacemaker-schedulerd[170752]:  warning: Unexpected result (error) was recorded for start of vmfence on cmpcprmq90 at Dec 11 15:17:24 2025
+Dec 11 15:32:26 cmpcprmq90 pacemaker-schedulerd[170752]:  warning: vmfence cannot run on cmpcprmq90 due to reaching migration threshold (clean up resource to allow again)
+Dec 11 15:32:26 cmpcprmq90 pacemaker-schedulerd[170752]:  warning: Calculated transition 7 (with warnings), saving inputs in /var/lib/pacemaker/pengine/pe-warn-69.bz2
+Dec 11 15:32:26 cmpcprmq90 pacemaker-controld[170753]:  notice: Transition 7 (Complete=0, Pending=0, Fired=0, Skipped=0, Incomplete=0, Source=/var/lib/pacemaker/pengine/pe-warn-69.bz2): Complete
+Dec 11 15:32:26 cmpcprmq90 pacemaker-controld[170753]:  notice: State transition S_TRANSITION_ENGINE -> S_IDLE

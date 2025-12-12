@@ -1,0 +1,185 @@
+🟢 Full 2-Node Pacemaker Cluster Setup with VMware fencing (A-Z)
+🔷 Prerequisites:
+
+दो nodes:
+
+cmpcprmq90 (Node 1)
+cmpcprmq94 (Node 2)
+
+VMware vCenter credentials (REST API enabled)
+
+Root / sudo access दोनों nodes पर
+
+Network connectivity दोनों nodes और vCenter के बीच
+
+Both nodes पर hostname properly set हो (cmpcprmq90, cmpcprmq94) और /etc/hosts या DNS में entries हों
+Summary:
+Step	Command/example
+Edit hosts file	sudo vi /etc/hosts
+Add lines	172.16.0.201 cmpcprmq90
+172.16.0.202 cmpcprmq94
+Save & exit	:wq
+Test DNS resolution	ping cmpcprmq94
+
+
+
+
+
+Step 1 — Install required packages (दोनों nodes):
+sudo yum install -y pacemaker pcs fence-agents-all
+
+Step 2 — Enable and start pcsd service (दोनों nodes):
+sudo systemctl enable pcsd --now
+
+Step 3 — Set password for hacluster user (दोनों nodes):
+sudo passwd hacluster
+
+
+(Ensure both nodes have same password for hacluster)
+
+Step 4 — Authenticate cluster nodes (from cmpcprmq90):
+sudo pcs cluster auth cmpcprmq90 cmpcprmq94 -u hacluster -p <password>
+
+Step 5 — Setup cluster:
+sudo pcs cluster setup --name mq_cluster cmpcprmq90 cmpcprmq94
+
+Step 6 — Start and enable cluster on both nodes:
+sudo pcs cluster start --all
+sudo pcs cluster enable --all
+
+Step 7 — Set quorum policy (important for 2 node cluster):
+sudo pcs property set no-quorum-policy=freeze
+freeze
+Quorum नहीं मिला तो resource operations रोक देगा
+Production में best practice
+
+
+Step 8 — Configure VMware fencing (STONITH)
+Example command (replace with your vCenter info):
+
+
+
+{ 
+self
+2️⃣ fence_vmware_rest क्या है?
+ये एक fencing agent (plugin) है जो VMware vSphere या vCenter के REST API का उपयोग करके virtual machines को power off/on/reboot करता है।
+इसका इस्तेमाल तब होता है जब आपका cluster nodes VMware virtual machines में running हों।
+fence_vmware_rest agent VMware के API के ज़रिये VM को remotely बंद या restart करता है।
+}
+
+
+
+
+IP Address	Role
+10.191.22.53	VMware vCenter / ESXi Host IP (fencing के लिए)
+10.191.145.144	Virtual IP (VIP) जो cluster resource के लिए फ्लोट करता है
+
+
+
+
+Virtual IP resource create करते वक्त:
+
+pcs resource create VirtualIP IPaddr2 ip=10.191.145.144 cidr_netmask=21 nic=ens192 op monitor interval=20s
+
+VirtualIP → resource name
+IPaddr2 → resource agent जो VIP handle करता है                 ------------- vip means virtual ip
+ip=10.191.145.144 → वह IP जो cluster में floating होगी
+cidr_netmask=21 → network mask
+nic=ens192 → network interface name
+op monitor interval=20s → 20 सेकंड में health check
+
+VMware fencing resource create करते वक्त:
+
+pcs stonith create vmfence fence_vmware_rest \
+ipaddr=10.191.22.53 \
+username=cmpmq@sbi.co.in \
+passwd='gfhfhhhhfh' \
+ssl_insecure=1 \
+pcmk_host_map="cmpcprmq90:CMP_FASTPLUSP_MQ_Svr1;cmpcprmq94:CMP_FASTPLUSP_MQ_Svr2" \
+op monitor interval=60s
+
+
+vmfence → fencing resource का नाम
+
+fence_vmware_rest → VMware REST API fencing agent
+
+ipaddr=10.191.22.53 → vCenter या ESXi host का IP
+
+username और passwd → VMware के credentials
+
+ssl_insecure=1 → SSL certificate verification skip (अगर cert trusted नहीं)
+
+pcmk_host_map → cluster nodes और VMware VM names की mapping
+
+op monitor interval=60s → 60 सेकंड में fencing agent health check
+
+
+
+
+
+
+
+
+
+
+
+
+Step 9 — Enable fencing and failover properties:
+
+sudo pcs property set stonith-enabled=true
+sudo pcs property set startup-fencing=true
+sudo pcs property set concurrent-fencing=true
+sudo pcs property set cluster-recheck-interval=1min
+
+Step 10 — Create Virtual IP resource:
+sudo pcs resource create VirtualIP IPaddr2 ip=10.191.145.144 cidr_netmask=21 nic=ens192 op monitor interval=20s
+
+Step 11 — Create MQ service resource (example):
+sudo pcs resource create MQService systemd:mqserver op monitor interval=15s
+
+Step 12 — Setup resource constraints (ordering and colocation):
+sudo pcs constraint order VirtualIP then MQService
+sudo pcs constraint colocation add MQService with VirtualIP INFINITY
+
+Step 13 — Verify cluster status and fencing:
+pcs status --full
+pcs resource show
+pcs stonith show
+pcs quorum status
+
+Step 14 — Test failover:
+
+Move VIP to other node:
+
+sudo pcs resource move VirtualIP cmpcprmq94
+
+
+Shutdown node and check failover:
+
+sudo ssh cmpcprmq90 sudo shutdown -r now
+
+
+Verify VIP and MQService move to other node.
+
+Step 15 — Check logs if any issues:
+journalctl -u pacemaker -f
+journalctl -u corosync -f
+journalctl -u pcsd -f
+
+🔑 Important Tips:
+
+VMware fencing requires vCenter user with correct permissions for power on/off/reset VM
+
+Firewall must allow necessary ports: UDP 5404-5405, TCP 2224
+
+hacluster password must be same on all nodes
+
+Node hostnames must match cluster config
+
+Corosync config (if customized) should have proper node IPs and nodeids
+
+Use secure passwords and SSL if possible (ssl_insecure=1 is for testing)
+
+अगर आप चाहते हैं, तो fencing के बिना basic cluster setup या IPMI fencing का भी A-Z दे सकता हूँ।
+
+बताइए क्या चाहिए?
